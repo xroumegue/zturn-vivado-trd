@@ -1,6 +1,8 @@
 #! /bin/bash
-mkdir -p fsbl && cd fsbl && cp ../zturn.hdf .
+
+DIR=$1
+HWDEF=../zturn.hdf
+echo $DIR
+mkdir -p "$DIR" && cd "$DIR" && cp "$HWDEF" .
 hsi -mode batch -source ../bin/fsbl.tcl 
 cd -
-make -C fsbl/fsbl
-cp fsbl/fsbl/executable.elf fsbl.elf
