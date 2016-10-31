@@ -10,31 +10,31 @@ all: bit fsbl
 bit:${BIT_FILE}
 
 ${BIT_FILE}: ${PROJECT}
-	PROJECT=${PROJECT} HWDEF=${HWDEF_FILE} FSBL=${FSBL_SRCS}  bin/make-bitfile.sh $<
+	PROJECT=${PROJECT} HWDEF=${HWDEF_FILE} FSBL=${FSBL_SRCS}  bin/make-bitfile.sh
 	cp  $</$<.runs/impl_1/z_turn_wrapper.bit $@
 
 .PHONY:project
 project:${PROJECT}
 
 ${PROJECT}:
-	 PROJECT=${PROJECT} HWDEF=${HWDEF_FILE} FSBL=${FSBL_SRCS} bin/make-project.sh ${PROJECT}
+	 PROJECT=${PROJECT} HWDEF=${HWDEF_FILE} FSBL=${FSBL_SRCS} bin/make-project.sh
 
 .PHONY:hdf
 hdf:${HWDEF_FILE}
 
 ${HWDEF_FILE}: ${PROJECT}
-	PROJECT=${PROJECT} HWDEF=${HWDEF_FILE} FSBL=${FSBL_SRCS}  bin/make-hwdef.sh $< $@
+	PROJECT=${PROJECT} HWDEF=${HWDEF_FILE} FSBL=${FSBL_SRCS}  bin/make-hwdef.sh
 
 
 .PHONY:fsbl
 fsbl:${FSBL_FILE}
 
-${FSBL_SRCS}: ${PROJECT}
-	PROJECT=${PROJECT} HWDEF=${HWDEF_FILE} FSBL=${FSBL_SRCS} bin/make-fsbl.sh $@
+${FSBL_SRCS}: ${PROJECT} ${HWDEF_FILE}
+	PROJECT=${PROJECT} HWDEF=${HWDEF_FILE} FSBL=${FSBL_SRCS} bin/make-fsbl.sh
 
 
 
-${FSBL_FILE}: hdf ${FSBL_SRCS}
+${FSBL_FILE}: ${FSBL_SRCS}
 	make -C ${FSBL_SRCS}/fsbl CFLAGS=-DFSBL_DEBUG_INFO
 	cp ${FSBL_SRCS}/fsbl/executable.elf $@
 
