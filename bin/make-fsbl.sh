@@ -1,8 +1,5 @@
 #! /bin/bash
 
-DIR=$1
-HWDEF=../zturn.hdf
-echo $DIR
-mkdir -p "$DIR" && cd "$DIR" && cp "$HWDEF" .
+mkdir -p "$FSBL" && cd "$FSBL" && cp ../"$HWDEF" .
 hsi -mode batch -source ../bin/fsbl.tcl 
 cd -

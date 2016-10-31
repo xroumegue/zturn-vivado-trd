@@ -1,30 +1,40 @@
 PROJECT:=zturn-trd
-BIT_FILE:=zturn-trd.bit
-HWDEF_FILE:=zturn.hdf
-FSBL:=fsbl.elf
-FSBL_SRCS:=fsbl
+BIT_FILE:=${PROJECT}.bit
+HWDEF_FILE:=${PROJECT}.hdf
+FSBL_FILE:=fsbl.elf
+FSBL_SRCS:=fsbl_src
 
-all: ${BIT_FILE} ${HWDEF_FILE} ${FSBL}
+all: bit hdf fsbl
+
+.PHONY=bit
+bit:${BIT_FILE}
 
 ${BIT_FILE}: ${PROJECT}
-	bin/make-bitfile.sh ${BIT_FILE}
-	cp  ${PROJECT}/${PROJECT}.runs/impl_1/z_turn_wrapper.bit $@
+	PROJECT=${PROJECT} HWDEF=${HWDEF_FILE} FSBL=${FSBL_SRCS}  bin/make-bitfile.sh $<
+	cp  $</$<.runs/impl_1/z_turn_wrapper.bit $@
 
 ${PROJECT}:
-	bin/make-project.sh ${PROJECT}
+	 PROJECT=${PROJECT} HWDEF=${HWDEF_FILE} FSBL=${FSBL_SRCS} bin/make-project.sh ${PROJECT}
+
+.PHONY=hdf
+hdf:${HWDEF_FILE}
 
 ${HWDEF_FILE}: ${PROJECT}
-	bin/make-hwdef.sh ${HWDEF_FILE}
+	PROJECT=${PROJECT} HWDEF=${HWDEF_FILE} FSBL=${FSBL_SRCS}  bin/make-hwdef.sh $< $@
 
 ${FSBL_SRCS}: ${PROJECT}
-	bin/make-fsbl.sh $@
+	PROJECT=${PROJECT} HWDEF=${HWDEF_FILE} FSBL=${FSBL_SRCS} bin/make-fsbl.sh $@
 
-${FSBL}: ${FSBL_SRCS}
-	make -C ${FSBL_SRCS}/fsbl
+
+.PHONY=fsbl
+fsbl:${FSBL_FILE}
+
+${FSBL_FILE}: hdf ${FSBL_SRCS}
+	make -C ${FSBL_SRCS}/fsbl CFLAGS=-DFSBL_DEBUG_INFO
 	cp ${FSBL_SRCS}/fsbl/executable.elf $@
 
-clean_${FSBL}:
-	rm -f ${FSBL}
+clean_${FSBL_FILE}:
+	rm -f ${FSBL_FILE}
 
 clean_${FSBL_SRCS}:
 	rm -Rf ${FSBL_SRCS}
@@ -35,7 +45,7 @@ clean_${PROJECT}:
 clean_${BIT_FILE}:
 	rm -f ${BIT_FILE}
 
-clean: clean_${FSBL} clean_${FSBL_SRCS} clean_${PROJECT}
-	rm -f ${BIT_FILE} ${HWDEF_FILE} ${FSBL} 
+clean: clean_${FSBL_FILE} clean_${FSBL_SRCS} clean_${PROJECT}
+	rm -f ${BIT_FILE} ${HWDEF_FILE}
 	rm -f vivado*
 	rm -f hsi*

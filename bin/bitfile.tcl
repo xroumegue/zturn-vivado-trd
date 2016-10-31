@@ -1,4 +1,8 @@
-open_project zturn-trd/zturn-trd.xpr
+#!/usr/bin/tclsh
+
+source bin/env.tcl
+
+open_project $project/$project.xpr
 reset_run synth_1
 reset_run impl_1
 launch_runs synth_1
