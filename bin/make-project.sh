@@ -1,3 +1,3 @@
 #! /bin/bash
-
-vivado -mode batch -source src/tcl/zturn.tcl 
+set -eux
+vivado -mode batch -source src/tcl/zturn_bd.tcl

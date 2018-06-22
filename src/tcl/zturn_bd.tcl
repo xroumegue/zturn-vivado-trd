@@ -41,9 +41,12 @@ if { [string first $scripts_vivado_version $current_vivado_version] == -1 } {
 # project, but make sure you do not have an existing project
 # <./myproj/project_1.xpr> in the current working folder.
 
+# Set the project name
+set proj_name "zturn-trd"
+
 set list_projs [get_projects -quiet]
 if { $list_projs eq "" } {
-   create_project project_1 myproj -part xc7z020clg400-1
+   create_project ${proj_name} ./${proj_name} -part xc7z020clg400-1
 }
 
 
@@ -88,7 +91,7 @@ if { ${design_name} eq "" } {
    set errMsg "Design <$design_name> already exists in your project, please set the variable <design_name> to another value."
    set nRet 1
 } elseif { [get_files -quiet ${design_name}.bd] ne "" } {
-   # USE CASES: 
+   # USE CASES:
    #    6) Current opened design, has components, but diff names, design_name exists in project.
    #    7) No opened design, design_name exists in project.
 
@@ -122,7 +125,7 @@ set bCheckIPsPassed 1
 ##################################################################
 set bCheckIPs 1
 if { $bCheckIPs == 1 } {
-   set list_check_ips "\ 
+   set list_check_ips "\
 xilinx.com:ip:processing_system7:5.5\
 "
 
@@ -834,4 +837,16 @@ proc create_root_design { parentCell } {
 
 create_root_design ""
 
+set root_dir "[file normalize "."]"
+set proj_dir "[file normalize "$root_dir/${proj_name}"]"
+
+
+make_wrapper -files [get_files ${proj_dir}/${proj_name}.srcs/sources_1/bd/z_turn/z_turn.bd] -top
+add_files -fileset sources_1 -norecurse ${proj_dir}/${proj_name}.srcs/sources_1/bd/z_turn/hdl/z_turn_wrapper.v
+add_files -fileset constrs_1 -norecurse ${root_dir}/src/constrs/system.xdc
+set_property target_constrs_file ${root_dir}/src/constrs/system.xdc [current_fileset -constrset]
+
+# Set 'sources_1' fileset properties
+set obj [get_filesets sources_1]
+set_property -name "top" -value "z_turn_wrapper" -objects $obj
 
